@@ -13,6 +13,22 @@ Mandate reads a JSON session file describing an agent's task, output, and progre
 5. **Supports 3 strictness levels**: `gentle`, `firm`, and `drill-sergeant` (all safety-respecting)
 6. **Flags and rejects** prompts that attempt to bypass safety, deceive models, or manufacture false motivations
 
+## Design Vocabulary
+
+If you want the more technical framing, Mandate sits in the lane of:
+
+- **process supervision**
+- **evaluator-optimizer loops**
+- **verifier-executor split**
+- **calibration-aware scoring**
+- **anti-reward-hacking KPI design**
+- **bounded revision systems**
+
+See also:
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [GLOSSARY.md](./GLOSSARY.md)
+- [RESEARCH.md](./RESEARCH.md)
+
 ## Use Cases
 
 - Orchestrating agent swarms with quality gates
@@ -191,6 +207,15 @@ Create a JSON file describing the agent's current state:
 - **gentle**: Encouraging, supportive feedback. Good for early exploration.
 - **firm**: Direct and demanding. Expects evidence and specifics.
 - **drill-sergeant**: High-pressure, zero-tolerance for vagueness — but *explicitly honest and non-deceptive*. Does not pretend the agent has feelings or use manipulation. Just holds a very high bar.
+
+## Design Principles
+
+- **Pressure through structure, not deception**
+- **Evidence over eloquence**
+- **Calibration over bravado**
+- **Hard gates over vague vibes**
+- **Bounded revision over infinite self-critique**
+- **Human escalation over fake certainty**
 
 ## Safety Philosophy
 
