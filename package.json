@@ -1,0 +1,28 @@
+{
+  "name": "ai-foreman",
+  "version": "0.1.0",
+  "description": "CLI + prompt engine that supervises AI agents with OKRs, scorecards, self-review, and coaching — safely and honestly.",
+  "main": "dist/index.js",
+  "bin": {
+    "ai-foreman": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "supervisor",
+    "okr",
+    "scorecard",
+    "prompt-engineering",
+    "coaching"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  }
+}
