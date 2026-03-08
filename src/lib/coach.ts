@@ -112,7 +112,7 @@ export function formatScorecard(output: CoachingOutput): string {
 
   const rule = "═".repeat(W);
   lines.push(`╔${rule}╗`);
-  lines.push(`║${pad("AI FOREMAN — SCORECARD", W, "center")}║`);
+  lines.push(`║${pad("MANDATE — SCORECARD", W, "center")}║`);
   lines.push(`╠${rule}╣`);
   lines.push(`║  Agent: ${pad(scorecard.agentId, W - 10)}║`);
   lines.push(`║  Task:  ${pad(scorecard.taskId, W - 10)}║`);

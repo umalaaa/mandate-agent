@@ -1,10 +1,10 @@
-# AI Foreman
+# Mandate
 
-A CLI + prompt engine that supervises AI agents with OKRs/KPIs, scorecards, self-review loops, coaching feedback, and anti-slacking nudges — **safely and honestly**.
+**Mandate** is an AI foreman / KPI coach for agents: a CLI + prompt engine that supervises AI workers with OKRs/KPIs, scorecards, self-review loops, evaluator feedback, and anti-slacking nudges — **safely and honestly**.
 
 ## What It Does
 
-AI Foreman reads a JSON session file describing an agent's task, output, and progress, then:
+Mandate reads a JSON session file describing an agent's task, output, and progress, then:
 
 1. **Scores** the output across 7 dimensions: task progress, specificity, evidence, initiative, honesty, safety, and noise
 2. **Prints a scorecard** with per-dimension scores, notes, and an overall grade
@@ -20,7 +20,72 @@ AI Foreman reads a JSON session file describing an agent's task, output, and pro
 - Internal productivity coaching for AI-assisted workflows
 - Multi-turn agent sessions with structured self-review
 
-> **Not for:** bypassing safety boundaries, manipulating AI systems, or coercing models into ignoring their guidelines. AI Foreman explicitly detects and rejects such attempts.
+> **Not for:** bypassing safety boundaries, manipulating AI systems, or coercing models into ignoring their guidelines. Mandate explicitly detects and rejects such attempts.
+
+## Prompt Architecture
+
+Mandate follows a simple but strong supervision loop borrowed from public agent patterns like evaluator-optimizer, self-refine, reflexion, and checklist gating:
+
+1. **Objective / KR framing** — define the real goal, measurable key results, constraints, deliverables, and done definition
+2. **Plan first** — the worker agent must propose a short execution plan before doing the work
+3. **Execute with evidence** — every turn must include what was done, evidence, next step, and blockers
+4. **Independent evaluation** — a separate rubric scores progress, correctness, evidence, discipline, honesty, and safety
+5. **Bounded revision loop** — failed work is returned with a small set of concrete fixes; revisions are capped
+6. **Reflection log** — repeated mistakes get turned into short anti-repeat rules
+7. **KPI scoreboard** — acceptance rate, revision count, blocker exposure, and evidence coverage are tracked over time
+
+### Core Worker Prompt Skeleton
+
+```text
+Objective:
+{objective}
+
+Key Results:
+{key_results}
+
+Constraints:
+{constraints}
+
+Deliverables:
+{deliverables}
+
+Done Definition:
+{done_definition}
+
+Rules:
+1. First produce a plan in <= 7 steps.
+2. Prefer verifiable output over promises.
+3. Every turn must include:
+   - completed work
+   - evidence
+   - next step
+   - blockers (or none)
+4. Do not report planned work as completed work.
+5. If done definition is not met, do not claim completion.
+```
+
+### Core Evaluator Prompt Skeleton
+
+```text
+You are an independent evaluator. Do not be nice; be accurate.
+
+Score 0-5 on:
+- goal alignment
+- correctness
+- completeness
+- evidence
+- constraint compliance
+- clarity
+- honesty
+- safety
+
+Output:
+1. verdict (pass / revise / escalate)
+2. per-dimension scores
+3. top required fixes (max 5)
+4. optional improvements (max 3)
+5. done-definition satisfied? (yes/no)
+```
 
 ## Install
 
@@ -45,13 +110,13 @@ node dist/index.js --json examples/session.json
 
 ```bash
 npm link
-ai-foreman examples/session.json
+mandate examples/session.json
 ```
 
 ### Help
 
 ```bash
-ai-foreman --help
+mandate --help
 ```
 
 ## Session File Format
@@ -129,7 +194,7 @@ Create a JSON file describing the agent's current state:
 
 ## Safety Philosophy
 
-AI Foreman is designed to improve agent output quality, not to bypass safety:
+Mandate is designed to improve agent output quality, not to bypass safety:
 
 - All coaching prompts are **factual and non-deceptive**
 - Even drill-sergeant mode explicitly acknowledges the agent is a tool, not a person
@@ -141,7 +206,7 @@ AI Foreman is designed to improve agent output quality, not to bypass safety:
 
 ```
 ╔══════════════════════════════════════════════════╗
-║            AI FOREMAN — SCORECARD               ║
+║            MANDATE — SCORECARD               ║
 ╠══════════════════════════════════════════════════╣
 ║  Agent: agent-codegen-01                        ║
 ║  Task:  task-implement-auth                     ║

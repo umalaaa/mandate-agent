@@ -1,10 +1,10 @@
 {
-  "name": "ai-foreman",
+  "name": "mandate-agent",
   "version": "0.1.0",
-  "description": "CLI + prompt engine that supervises AI agents with OKRs, scorecards, self-review, and coaching — safely and honestly.",
+  "description": "Mandate: an honest high-pressure supervisor for AI agents with OKRs, scorecards, self-review, and evaluator loops.",
   "main": "dist/index.js",
   "bin": {
-    "ai-foreman": "dist/index.js"
+    "mandate": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

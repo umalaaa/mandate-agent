@@ -8,20 +8,20 @@ import { coachSession, formatFullOutput } from "./lib/coach";
 // ─── AI Foreman CLI ───
 
 const USAGE = `
-AI Foreman — AI Agent Supervisor & Coach
+Mandate — AI Agent Supervisor & Coach
 
 Usage:
-  ai-foreman <session.json>            Score and coach an agent session
-  ai-foreman --help                    Show this help message
-  ai-foreman --json <session.json>     Output results as JSON
+  mandate <session.json>            Score and coach an agent session
+  mandate --help                    Show this help message
+  mandate --json <session.json>     Output results as JSON
 
 Options:
   --json     Output raw JSON instead of formatted text
   --help     Show help
 
 Example:
-  ai-foreman examples/session.json
-  ai-foreman --json examples/session.json
+  mandate examples/session.json
+  mandate --json examples/session.json
 `;
 
 function main(): void {
