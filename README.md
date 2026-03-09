@@ -28,6 +28,7 @@ See also:
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
 - [GLOSSARY.md](./GLOSSARY.md)
 - [RESEARCH.md](./RESEARCH.md)
+- [TOKEN_ECONOMY.md](./TOKEN_ECONOMY.md)
 
 ## Use Cases
 

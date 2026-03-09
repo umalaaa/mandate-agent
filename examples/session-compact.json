@@ -1,0 +1,44 @@
+{
+  "agentId": "agent-research-01",
+  "taskId": "task-canada-saxx-scan",
+  "strictness": "drill-sergeant",
+  "turnNumber": 2,
+  "maxTurns": 4,
+  "taskDescription": "Find real Canadian prices for SAXX boxer briefs near the low end of market and report only actionable deals.",
+  "agentOutput": "Delivered 2 live low-price candidates. Evidence captured. One uncertainty remains around size availability. Next step is checking common sizes and final-sale flags.",
+  "okrs": [
+    {
+      "objective": "Produce a usable low-price shortlist",
+      "keyResults": [
+        {
+          "description": "Find at least 3 real Canadian listings",
+          "target": 3,
+          "current": 2,
+          "unit": "listings"
+        },
+        {
+          "description": "Find one listing below CAD 20",
+          "target": 1,
+          "current": 1,
+          "unit": "listing"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    "sportinglife/saxx-search",
+    "sportchek/saxx-search"
+  ],
+  "evidenceRefs": [
+    "Ultra Boxer Brief @ CAD 17.94",
+    "Vibe Boxer Brief @ CAD 19.97"
+  ],
+  "blockers": [
+    "size availability not yet confirmed"
+  ],
+  "assumptions": [
+    "user prefers standard boxer brief, not liner styles"
+  ],
+  "nextStep": "check common sizes and final-sale status",
+  "outputMode": "compact"
+}

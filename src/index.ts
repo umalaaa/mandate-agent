@@ -3,7 +3,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Session } from "./lib/types";
-import { coachSession, formatFullOutput } from "./lib/coach";
+import { coachSession, formatFullOutput, formatCompactOutput, formatHandoff } from "./lib/coach";
 
 // ─── AI Foreman CLI ───
 
@@ -14,14 +14,20 @@ Usage:
   mandate <session.json>            Score and coach an agent session
   mandate --help                    Show this help message
   mandate --json <session.json>     Output results as JSON
+  mandate --compact <session.json>  Compact token-efficient output
+  mandate --handoff <session.json>  Minimal handoff context packet
 
 Options:
   --json     Output raw JSON instead of formatted text
+  --compact  Compact output (shorter scorecard, compressed prompts)
+  --handoff  Print only the one-line handoff summary
   --help     Show help
 
 Example:
   mandate examples/session.json
-  mandate --json examples/session.json
+  mandate --compact examples/session.json
+  mandate --json --compact examples/session.json
+  mandate --handoff examples/session.json
 `;
 
 function main(): void {
@@ -33,6 +39,8 @@ function main(): void {
   }
 
   const jsonMode = args.includes("--json");
+  const compactMode = args.includes("--compact");
+  const handoffMode = args.includes("--handoff");
   const filePath = args.find((a) => !a.startsWith("--"));
 
   if (!filePath) {
@@ -78,10 +86,14 @@ function main(): void {
   }
 
   // Run the coaching pipeline
-  const output = coachSession(session);
+  const output = coachSession(session, { compact: compactMode });
 
-  if (jsonMode) {
-    console.log(JSON.stringify(output, null, 2));
+  if (handoffMode) {
+    console.log(formatHandoff(output));
+  } else if (jsonMode) {
+    console.log(JSON.stringify(output, null, compactMode ? 0 : 2));
+  } else if (compactMode) {
+    console.log(formatCompactOutput(output));
   } else {
     console.log(formatFullOutput(output));
   }
