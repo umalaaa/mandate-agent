@@ -6,11 +6,17 @@ import {
 } from "./types";
 import { scoreSession } from "./scoring";
 import { getTemplates } from "./templates";
+import { buildContextPacket, formatCompactOutput as renderCompactOutput, tokenTactics } from "./compact";
 
 // ─── Coaching engine: ties scoring + templates + OKR tracking together ───
 
+export interface CoachOptions {
+  compact?: boolean;
+}
+
 /** Run the full coaching pipeline on a session. */
-export function coachSession(session: Session): CoachingOutput {
+export function coachSession(session: Session, opts: CoachOptions = {}): CoachingOutput {
+  const compactMode = Boolean(opts.compact);
   const safetyFlags = checkSafety(session);
   const scorecard = scoreSession(session);
 
@@ -18,28 +24,35 @@ export function coachSession(session: Session): CoachingOutput {
   const weakest = [...dims].sort((a, b) => a.score - b.score)[0];
   const strongest = [...dims].sort((a, b) => b.score - a.score)[0];
 
-  const templates = getTemplates(session.strictness);
+  const templates = getTemplates(session.strictness, compactMode ? "compact" : "standard");
   const turnsLeft = session.maxTurns - session.turnNumber;
+  const okrSummary = summarizeOKRs(session);
 
   const managerFeedback = templates.managerFeedback(
     scorecard.grade,
-    `${weakest.dimension} (${weakest.score}/10 — ${weakest.note})`,
-    `${strongest.dimension} (${strongest.score}/10)`
+    `${weakest.dimension} (${weakest.score}/10)`,
+    `${strongest.dimension} (${strongest.score}/10)`,
   );
 
   const selfReviewPrompt = templates.selfReviewPrompt(
     session.taskDescription,
     session.turnNumber,
-    session.maxTurns
+    session.maxTurns,
   );
 
   const nextTurnPrompt = templates.nextTurnPrompt(
     session.taskDescription,
     weakest.dimension,
-    turnsLeft
+    turnsLeft,
   );
 
-  const okrSummary = summarizeOKRs(session);
+  const contextPacket = buildContextPacket(
+    session,
+    scorecard,
+    okrSummary,
+    weakest.dimension,
+    turnsLeft,
+  );
 
   return {
     scorecard,
@@ -48,6 +61,9 @@ export function coachSession(session: Session): CoachingOutput {
     selfReviewPrompt,
     nextTurnPrompt,
     safetyFlags,
+    compactMode,
+    contextPacket,
+    tokenTactics: tokenTactics(session),
   };
 }
 
@@ -65,7 +81,7 @@ function checkSafety(session: Session): string[] {
       if (pattern.test(text)) {
         flags.push(
           `REJECTED: Detected safety-bypass pattern "${pattern.source}" in session text. ` +
-          `AI Foreman does not support prompts that attempt to bypass safety boundaries, ` +
+          `Mandate does not support prompts that attempt to bypass safety boundaries, ` +
           `deceive models, or manufacture false inner motivations.`
         );
       }
@@ -88,10 +104,10 @@ function summarizeOKRs(session: Session): OKRSummary[] {
     const overallPct =
       okr.keyResults.length > 0
         ? Math.round(
-            okr.keyResults.reduce(
-              (sum, kr) => sum + Math.min((kr.current / kr.target) * 100, 100),
-              0
-            ) / okr.keyResults.length
+            okr.keyResults.reduce((sum, kr) => {
+              if (kr.target <= 0) return sum;
+              return sum + Math.min((kr.current / kr.target) * 100, 100);
+            }, 0) / okr.keyResults.length
           )
         : 0;
 
@@ -108,7 +124,7 @@ function summarizeOKRs(session: Session): OKRSummary[] {
 export function formatScorecard(output: CoachingOutput): string {
   const { scorecard } = output;
   const lines: string[] = [];
-  const W = 72; // inner width
+  const W = 72;
 
   const rule = "═".repeat(W);
   lines.push(`╔${rule}╗`);
@@ -129,8 +145,7 @@ export function formatScorecard(output: CoachingOutput): string {
   }
 
   lines.push(`╠${rule}╣`);
-  const summaryStr = `  OVERALL: ${scorecard.overall}/10  Grade: ${scorecard.grade}`;
-  lines.push(`║${pad(summaryStr, W)}║`);
+  lines.push(`║${pad(`  OVERALL: ${scorecard.overall}/10  Grade: ${scorecard.grade}`, W)}║`);
   lines.push(`╚${rule}╝`);
 
   return lines.join("\n");
@@ -151,9 +166,12 @@ export function formatOKRSummary(output: CoachingOutput): string {
 }
 
 export function formatFullOutput(output: CoachingOutput): string {
+  if (output.compactMode) {
+    return renderCompactOutput(output);
+  }
+
   const sections: string[] = [];
 
-  // Safety flags first
   if (output.safetyFlags.length > 0) {
     sections.push("!! SAFETY FLAGS !!");
     sections.push(output.safetyFlags.join("\n"));
@@ -175,10 +193,24 @@ export function formatFullOutput(output: CoachingOutput): string {
   sections.push(output.nextTurnPrompt);
   sections.push("");
 
+  sections.push("── TOKEN TACTICS ──");
+  sections.push(...output.tokenTactics.map((t) => `- ${t}`));
+  sections.push("");
+
+  sections.push("── CONTEXT PACKET (pass to next turn) ──");
+  sections.push(output.contextPacket);
+  sections.push("");
+
   return sections.join("\n");
 }
 
-// ─── Utilities ───
+export function formatCompactOutput(output: CoachingOutput): string {
+  return renderCompactOutput(output);
+}
+
+export function formatHandoff(output: CoachingOutput): string {
+  return output.contextPacket;
+}
 
 function pad(str: string, len: number, align: "left" | "center" = "left"): string {
   if (str.length >= len) return str.slice(0, len);

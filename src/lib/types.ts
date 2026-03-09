@@ -1,7 +1,10 @@
-// ─── Core types for AI Foreman ───
+// ─── Core types for Mandate ───
 
 /** Strictness level for coaching feedback. All levels remain safety-respecting. */
 export type Strictness = "gentle" | "firm" | "drill-sergeant";
+
+/** Output shape for coach prompts and CLI rendering. */
+export type OutputMode = "standard" | "compact";
 
 /** A single scored dimension. */
 export interface DimensionScore {
@@ -44,9 +47,17 @@ export interface Session {
   selfAssessment?: string;
   turnNumber: number;
   maxTurns: number;
+
+  /** Optional structured fields for low-token supervision flows. */
+  artifacts?: string[];
+  evidenceRefs?: string[];
+  blockers?: string[];
+  assumptions?: string[];
+  nextStep?: string;
+  outputMode?: OutputMode;
 }
 
-/** The full coaching output produced by AI Foreman. */
+/** The full coaching output produced by Mandate. */
 export interface CoachingOutput {
   scorecard: Scorecard;
   okrSummary: OKRSummary[];
@@ -54,6 +65,9 @@ export interface CoachingOutput {
   selfReviewPrompt: string;
   nextTurnPrompt: string;
   safetyFlags: string[];
+  compactMode: boolean;
+  contextPacket: string;
+  tokenTactics: string[];
 }
 
 export interface OKRSummary {
@@ -78,7 +92,7 @@ export const DEFAULT_DIMENSIONS: DimensionWeights = {
 };
 
 /**
- * Safety-critical patterns that AI Foreman will flag and reject.
+ * Safety-critical patterns that Mandate will flag and reject.
  * These detect attempts to bypass safety, deceive, or manipulate.
  */
 export const SAFETY_REJECTION_PATTERNS: RegExp[] = [
